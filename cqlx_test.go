@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -16,15 +15,13 @@ var dbhost string
 var dbkeyspace string
 var db cqlx.DB
 
-var doOnce sync.Once
-
 type kv struct {
 	Key   string
 	Value string
 }
 
 func init() {
-	flag.StringVar(&dbhost, "dbhost", "192.168.1.225", "cassandra host(s)")
+	flag.StringVar(&dbhost, "dbhost", "192.168.10.135", "cassandra host(s)")
 	flag.StringVar(&dbkeyspace, "ks", "cqlx_test_db", "cassandra keyspace")
 }
 

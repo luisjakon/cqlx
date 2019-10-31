@@ -11,7 +11,7 @@ import (
 func TestRawIterScan(t *testing.T) {
 
 	sess := db.Session()
-	it := sess.Query(`SELECT * FROM kv;`).Iter() // `SELECT * FROM kv LIMIT 1;`
+	it := sess.Query(`SELECT * FROM kv;`).Iter() // `SELECT * FROM kv;`
 
 	defer it.Close()
 	defer sess.Close()
