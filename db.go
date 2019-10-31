@@ -17,19 +17,11 @@ func (db *DB) Open(dbkeyspace string, dbhosts ...string) (err error) {
 }
 
 func (db *DB) View(fn func(Tx) error) error {
-	s, err := db.Session()
-	if err != nil {
-		return err
-	}
-	return viewtx(s, fn)
+	return viewtx(db, fn)
 }
 
 func (db *DB) Update(fn func(Tx) error) error {
-	s, err := db.Session()
-	if err != nil {
-		return err
-	}
-	return updatetx(s, fn)
+	return updatetx(db, fn)
 }
 
 func (db *DB) Session() (*Sessionx, error) {

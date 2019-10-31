@@ -2,13 +2,21 @@ package cqlx
 
 type Tx = *Sessionx
 
-///// PSEUDO-FUNCTIONAL FAKE TRANSACTIONS
-func viewtx(s *Sessionx, fn func(tx Tx) error) error {
+///// AUTO_CLOSING PSEUDO-FUNCTIONAL FAKE TRANSACTIONS
+func viewtx(db *DB, fn func(tx Tx) error) error {
+	s, err := db.Session()
+	if err != nil {
+		return err
+	}
 	defer s.Close()
 	return fn(Tx(s))
 }
 
-func updatetx(s *Sessionx, fn func(tx Tx) error) error {
+func updatetx(db *DB, fn func(tx Tx) error) error {
+	s, err := db.Session()
+	if err != nil {
+		return err
+	}
 	defer s.Close()
 	return fn(Tx(s))
 }
