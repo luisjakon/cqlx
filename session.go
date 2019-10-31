@@ -40,5 +40,5 @@ func (q *Queryx) Exec() error {
 }
 
 func (q *Queryx) Iter() *Iterx {
-	return iterx(q.Queryx)
+	return iterx(q)
 }

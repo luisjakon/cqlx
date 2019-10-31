@@ -76,11 +76,11 @@ func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *Queryx {
 }
 
 //// Iterx
-func iterx(qry *gocqlx.Queryx) *Iterx {
-	if qry == nil {
+func iterx(qry *Queryx) *Iterx {
+	if qry.Queryx == nil {
 		return &Iterx{}
 	}
-	return &Iterx{qry.Iter()}
+	return &Iterx{qry.Queryx.Iter()}
 }
 
 //// QueryxType
