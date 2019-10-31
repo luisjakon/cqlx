@@ -10,11 +10,11 @@ type DB struct {
 	*gocql.ClusterConfig
 }
 
-func OpenWithConfig(c *gocql.ClusterConfig) Database {
+func OpenWithConfig(c *gocql.ClusterConfig) *DB {
 	return NewDBWithConfig(c)
 }
 
-func Open(dbkeyspace string, dbhosts ...string) Database {
+func Open(dbkeyspace string, dbhosts ...string) *DB {
 	return NewDB(dbkeyspace, dbhosts...)
 }
 

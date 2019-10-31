@@ -13,7 +13,7 @@ import (
 
 var dbhost string
 var dbkeyspace string
-var db cqlx.Database
+var db *cqlx.DB
 
 type kv struct {
 	Key   string
