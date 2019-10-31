@@ -1,7 +1,6 @@
 package cqlx
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gocql/gocql"
@@ -9,99 +8,46 @@ import (
 	"github.com/scylladb/gocqlx/qb"
 )
 
-//// BASE EXECUTOR
-func execute(sess *gocql.Session, item interface{}, qry interface{}, args ...interface{}) error {
-	switch query := qry.(type) {
-	case *qb.SelectBuilder:
-		return smart_get(sess, item, query, args...)
-	case *qb.InsertBuilder:
-		return insert(sess, item, query)
-	case *qb.UpdateBuilder:
-		return update(sess, item, query, args...)
-	case *qb.DeleteBuilder:
-		return delete(sess, query, args...)
-	case *qb.BatchBuilder:
-		return batch(sess, query, args...)
-	case string:
-		return raw(sess, item, query, args...)
-	default:
-		log.Printf("CQLX: Unexpected query type -- %T", query)
-		return ErrInvalidQueryType
-	}
-}
+type QueryxType int
 
-//// SMART EXECUTORS
-func smart_get(sess *gocql.Session, res interface{}, qry interface{}, args ...interface{}) error {
-	switch query := qry.(type) {
-	case *qb.SelectBuilder:
-		if len(args) == 1 {
-			if arg, ok := args[0].(qb.M); ok {
-				if isSlice(res) {
-					return getMapped(sess, res, query, arg)
-				}
-				return getMapped(sess, res, query.Limit(1), arg)
-			}
+const (
+	Select = QueryxType(iota + 1)
+	Insert
+	Update
+	Delete
+	Batch
+	Raw
+)
+
+//// Executex
+func executex(q *query, item interface{}) error {
+	if item == nil {
+		return q.ExecRelease()
+	}
+	switch q.typ {
+	case Select:
+		if isSlice(item) {
+			return q.SelectRelease(item)
 		}
-		if isSlice(res) {
-			return get(sess, res, query, args...)
-		}
-		return get(sess, res, query.Limit(1), args...)
+		return q.GetRelease(item)
+	case Insert:
+		return q.BindStruct(item).GetRelease(item)
+	case Update:
+		return q.BindStruct(item).ExecRelease()
+	case Delete:
+		return q.ExecRelease()
+	case Batch:
+		return q.ExecRelease()
+	case Raw:
+		return q.GetRelease(item)
 	default:
-		log.Printf("CQLX: Unexpected query type -- %T", query)
+		log.Printf("CQLX: Unexpected query type -- %T", q.typ)
 		return ErrInvalidQueryType
 	}
 }
 
-func smart_put(sess *gocql.Session, newitem interface{}, qry interface{}, args ...interface{}) error {
-	switch query := qry.(type) {
-	case *qb.InsertBuilder:
-		return insert(sess, newitem, query)
-	case *qb.UpdateBuilder:
-		return update(sess, newitem, query, args...)
-	default:
-		log.Printf("CQLX: Unexpected query type -- %T", query)
-		return ErrInvalidQueryType
-	}
-}
-
-//// DUMB EXECUTORS
-func getMapped(sess *gocql.Session, res interface{}, query *qb.SelectBuilder, args qb.M) error {
-	return queryx(sess, query, args).BindMap(args).SelectRelease(res)
-}
-
-func getStruct(sess *gocql.Session, newitem interface{}, query *qb.SelectBuilder) error {
-	return queryx(sess, query).BindStruct(newitem).GetRelease(newitem)
-}
-
-func get(sess *gocql.Session, res interface{}, query *qb.SelectBuilder, args ...interface{}) error {
-	return queryx(sess, query, args...).GetRelease(res)
-}
-
-func insert(sess *gocql.Session, newitem interface{}, query *qb.InsertBuilder) error {
-	return queryx(sess, query).BindStruct(newitem).GetRelease(newitem)
-}
-
-func update(sess *gocql.Session, item interface{}, query *qb.UpdateBuilder, args ...interface{}) error {
-	return queryx(sess, query, args...).BindStruct(item).ExecRelease()
-}
-
-func delete(sess *gocql.Session, query *qb.DeleteBuilder, args ...interface{}) error {
-	return queryx(sess, query, args...).ExecRelease()
-}
-
-func batch(sess *gocql.Session, query *qb.BatchBuilder, args ...interface{}) error {
-	return queryx(sess, query, args...).ExecRelease()
-}
-
-func raw(sess *gocql.Session, item interface{}, query string, args ...interface{}) error {
-	if len(args) > 0 {
-		sess.Query(fmt.Sprintf(query, args...)).Exec()
-	}
-	return sess.Query(query).Exec()
-}
-
-//// QUERYX + ITERX GENERATORS
-func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *gocqlx.Queryx {
+//// Queryx
+func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) Queryx {
 	var stmt string
 	var names []string
 	switch query := qry.(type) {
@@ -118,14 +64,38 @@ func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *gocqlx.Q
 	case string:
 		stmt, names = query, nil
 	default:
-		return nil
+		return _NilQuery
 	}
-	return gocqlx.Query(sess.Query(stmt, args...), names)
+	if isMap(args...) {
+		return &query{gocqlx.Query(sess.Query(stmt, args...), names).BindMap(args[0].(qb.M)), queryxType(qry)}
+	}
+	return &query{gocqlx.Query(sess.Query(stmt, args...), names), queryxType(qry)}
 }
 
+//// Iterx
 func iterx(qry *gocqlx.Queryx) Iterx {
 	if qry == nil {
 		return _NilIter
 	}
 	return &iter{qry.Iter()}
+}
+
+//// QueryxType
+func queryxType(qry interface{}) QueryxType {
+	switch qry.(type) {
+	case *qb.SelectBuilder:
+		return Select
+	case *qb.InsertBuilder:
+		return Insert
+	case *qb.UpdateBuilder:
+		return Update
+	case *qb.DeleteBuilder:
+		return Delete
+	case *qb.BatchBuilder:
+		return Batch
+	case string:
+		return Raw
+	default:
+		return 0
+	}
 }

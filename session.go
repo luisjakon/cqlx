@@ -2,6 +2,7 @@ package cqlx
 
 import (
 	"github.com/gocql/gocql"
+	"github.com/scylladb/gocqlx"
 )
 
 type session struct {
@@ -9,7 +10,7 @@ type session struct {
 }
 
 func (s *session) Query(qry interface{}, args ...interface{}) Queryx {
-	return &query{s.Session, qry, args} // clone a new session
+	return queryx(s.Session, qry, args...) // clone a new session
 }
 
 func (s *session) Exec(stmt interface{}) error {
@@ -22,23 +23,22 @@ func (s *session) Close() error {
 }
 
 type query struct {
-	sess  *gocql.Session
-	query interface{}
-	args  []interface{}
+	*gocqlx.Queryx
+	typ QueryxType
 }
 
 func (q *query) Exec() error {
-	return execute(q.sess, nil, q.query, q.args...)
+	return executex(q, nil)
 }
 
 func (q *query) Put(newitem interface{}) error {
-	return smart_put(q.sess, newitem, q.query, q.args...)
+	return executex(q, newitem)
 }
 
 func (q *query) Get(res interface{}) error {
-	return smart_get(q.sess, res, q.query, q.args...)
+	return executex(q, res)
 }
 
 func (q *query) Iter() Iterx {
-	return iterx(queryx(q.sess, q.query, q.args...))
+	return iterx(q.Queryx)
 }
