@@ -7,7 +7,7 @@ import (
 )
 
 type db struct {
-	cluster *gocql.ClusterConfig
+	*gocql.ClusterConfig
 }
 
 func OpenWithConfig(c *gocql.ClusterConfig) DB {
@@ -21,8 +21,8 @@ func Open(dbkeyspace string, dbhosts ...string) DB {
 }
 
 func (db *db) Open(dbkeyspace string, dbhosts ...string) (err error) {
-	db.cluster = gocql.NewCluster(dbhosts...)
-	db.cluster.Keyspace = dbkeyspace
+	db.ClusterConfig = gocql.NewCluster(dbhosts...)
+	db.ClusterConfig.Keyspace = dbkeyspace
 	return
 }
 
@@ -39,10 +39,10 @@ func (db *db) Update(fn func(Tx) error) error {
 }
 
 func (db *db) Session() Session {
-	if db.cluster == nil {
+	if db.ClusterConfig == nil {
 		return _NilSession
 	}
-	sess, err := db.cluster.CreateSession()
+	sess, err := db.CreateSession()
 	if err != nil {
 		log.Printf(err.Error())
 		return _NilSession

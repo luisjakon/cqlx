@@ -66,45 +66,31 @@ func smart_put(sess *gocql.Session, newitem interface{}, qry interface{}, args .
 
 //// DUMB EXECUTORS
 func getMapped(sess *gocql.Session, res interface{}, query *qb.SelectBuilder, args qb.M) error {
-	stmt, names := query.ToCql()
-	q := gocqlx.Query(sess.Query(stmt), names).BindMap(args)
-	return q.SelectRelease(res)
+	return queryx(sess, query, args).BindMap(args).SelectRelease(res)
 }
 
 func getStruct(sess *gocql.Session, newitem interface{}, query *qb.SelectBuilder) error {
-	stmt, names := query.ToCql()
-	q := gocqlx.Query(sess.Query(stmt), names).BindStruct(newitem)
-	return q.GetRelease(newitem)
+	return queryx(sess, query).BindStruct(newitem).GetRelease(newitem)
 }
 
 func get(sess *gocql.Session, res interface{}, query *qb.SelectBuilder, args ...interface{}) error {
-	stmt, names := query.ToCql()
-	q := gocqlx.Query(sess.Query(stmt, args...), names)
-	return q.GetRelease(res)
+	return queryx(sess, query, args...).GetRelease(res)
 }
 
 func insert(sess *gocql.Session, newitem interface{}, query *qb.InsertBuilder) error {
-	stmt, names := query.ToCql()
-	q := gocqlx.Query(sess.Query(stmt), names).BindStruct(newitem)
-	return q.GetRelease(newitem)
+	return queryx(sess, query).BindStruct(newitem).GetRelease(newitem)
 }
 
 func update(sess *gocql.Session, item interface{}, query *qb.UpdateBuilder, args ...interface{}) error {
-	stmt, names := query.ToCql()
-	q := gocqlx.Query(sess.Query(stmt, args...), names).BindStruct(item)
-	return q.ExecRelease()
+	return queryx(sess, query, args...).BindStruct(item).ExecRelease()
 }
 
 func delete(sess *gocql.Session, query *qb.DeleteBuilder, args ...interface{}) error {
-	stmt, names := query.ToCql()
-	q := gocqlx.Query(sess.Query(stmt, args...), names)
-	return q.ExecRelease()
+	return queryx(sess, query, args...).ExecRelease()
 }
 
 func batch(sess *gocql.Session, query *qb.BatchBuilder, args ...interface{}) error {
-	stmt, names := query.ToCql()
-	q := gocqlx.Query(sess.Query(stmt, args...), names)
-	return q.ExecRelease()
+	return queryx(sess, query, args...).ExecRelease()
 }
 
 func raw(sess *gocql.Session, item interface{}, query string, args ...interface{}) error {
@@ -130,12 +116,9 @@ func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *gocqlx.Q
 	case *qb.BatchBuilder:
 		stmt, names = query.ToCql()
 	case string:
-		stmt, names = query, []string{"*"}
+		stmt, names = query, nil
 	default:
 		return nil
-	}
-	if args == nil {
-		return gocqlx.Query(sess.Query(stmt), names)
 	}
 	return gocqlx.Query(sess.Query(stmt, args...), names)
 }

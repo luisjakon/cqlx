@@ -8,6 +8,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestRawIterScan(t *testing.T) {
+
+	sess := db.Session()
+	it := sess.Query(`SELECT * FROM kv;`).Iter() // `SELECT * FROM kv LIMIT 1;`
+
+	defer it.Close()
+	defer sess.Close()
+
+	res := kv{}
+	ok := it.Next(&res)
+
+	assert.Equal(t, true, ok)
+	assert.Equal(t, "4", res.Key)
+	assert.Equal(t, "val4", res.Value)
+}
+
 func TestIterScan(t *testing.T) {
 
 	sess := db.Session()
