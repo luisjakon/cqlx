@@ -1,7 +1,7 @@
 cqlx
 =====
 
-Package cqlx implements a simpler, generic wrapper interface for interacting with CQL queries and native golang structs
+Package cqlx implements simpler bindings for dealing with CQL queries
 
 Project Website: https://github.com/luisjakon/cqlx<br>
 
@@ -14,9 +14,9 @@ Installation
 Features
 --------
 
-* Integrates and makes use of the venerable gocql/gocql and scylladb/gocqlx client packages
-* Simple intuitive API for executing queries using raw CQL and/or query builders from the gocqlx/qb package
-* Single-shot, autoclosing transactions via the db.Tx(...) interface
+* Uses a simple and consistent interface for processing raw CQL statements and/or ```scylladb/gocqlx``` query builders 
+* Allows access to the underlying native structs and methods built into the venerable ```gocql/gocql``` and ```scylladb/gocqlx``` client packages
+* Handles single-shot, autoclosing transactions via the db.Tx(...) interface
 
 
 Example of correct Tx usage:
@@ -33,6 +33,32 @@ err := db.Tx(func(tx cqlx.Tx) error {
 })
 ```
 Since the transaction is managed there is no need to issue a deferred closing.
+
+
+Extensibility
+--------
+
+* Extended usage of cqlx package structs:
+
+Example of setting the client connection timeout
+```go
+db := cqlx.Open("example", "192.168.1.225")
+db.Timeout = 3 * time.Second
+```
+
+Example of setting the session page size
+```go
+sess := db.Session()
+sess.SetPageSize(-1)
+```
+
+Example of adjusting a queryx consistency level
+```go
+qry = sess.Queryx("SELECT * FROM kv WHERE key='1'")
+err := qry.Consistency(1).Get(&res)
+```
+Since all cqlx structs derive from the base gocql and gocqlx packages, all of their implemented features are immediately available to the caller.
+
 
 Example
 -------
@@ -66,9 +92,17 @@ var (
 	delete = qb.Delete("kv").Where(qb.Eq("key"))                // `DELETE *  FROM kv WHERE key=?;`
 )
 
+var db *cqlx.DB
+
 func main() {
-	// create connection
-	db := cqlx.Open("example", "192.168.1.225")
+	// create db
+	createdb()
+	defer dropdb()
+
+	// set db keyspace 
+	db.Keyspace = "example"
+
+	// create session
 	sess := db.Session()
 	defer sess.Close()
 
@@ -97,11 +131,28 @@ func main() {
 	if err != nil {
 		log.Fatal("delete err:", err)
 	}
+}
 
+func init() {
+	db = cqlx.Open("", "192.168.10.135")
+	db.Timeout = 6 * time.Second
+}
+
+func createdb() {
+	db.Update(func(tx cqlx.Tx) error {
+		tx.Exec(`CREATE KEYSPACE IF NOT EXISTS example WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1 };`)
+		return tx.Exec(`CREATE TABLE IF NOT EXISTS example.kv (key text, value text, PRIMARY KEY (key));`)
+	})
+}
+
+func dropdb() {
+	db.Update(func(tx cqlx.Tx) error {
+		return tx.Exec(`DROP KEYSPACE IF EXISTS example;`)
+	})
 }
 ```
 
-Ecosystem
+Package Dependencies
 ---------
 
 * [gocql](https://github.com/gocql/gocql) the primary Cassandra client library for the Go language.
