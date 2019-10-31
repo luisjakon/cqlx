@@ -9,12 +9,12 @@ type Session struct {
 	*gocql.Session
 }
 
-func (s *Session) Query(qry interface{}, args ...interface{}) Queryx {
-	return queryx(s.Session, qry, args...) // clone a new session
+func (s *Session) Queryx(qry interface{}, args ...interface{}) *Queryx {
+	return queryx(s.Session, qry, args...)
 }
 
 func (s *Session) Exec(stmt interface{}) error {
-	return s.Query(stmt, nil).Exec()
+	return s.Queryx(stmt, nil).Exec()
 }
 
 func (s *Session) Close() error {
@@ -22,23 +22,23 @@ func (s *Session) Close() error {
 	return nil
 }
 
-type Query struct {
+type Queryx struct {
 	*gocqlx.Queryx
 	typ QueryxType
 }
 
-func (q *Query) Exec() error {
-	return executex(q, nil)
-}
-
-func (q *Query) Put(newitem interface{}) error {
-	return executex(q, newitem)
-}
-
-func (q *Query) Get(res interface{}) error {
+func (q *Queryx) Get(res interface{}) error {
 	return executex(q, res)
 }
 
-func (q *Query) Iter() Iterx {
+func (q *Queryx) Put(newitem interface{}) error {
+	return executex(q, newitem)
+}
+
+func (q *Queryx) Exec() error {
+	return executex(q, nil)
+}
+
+func (q *Queryx) Iter() *Iterx {
 	return iterx(q.Queryx)
 }

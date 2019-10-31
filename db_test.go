@@ -39,7 +39,7 @@ func TestDBViewTx(t *testing.T) {
 	db.View(func(tx cqlx.Tx) error {
 
 		res := kv{}
-		err := tx.Query(get, "4").Get(&res)
+		err := tx.Queryx(get, "4").Get(&res)
 
 		assert.Equal(t, nil, err)
 		assert.Equal(t, "4", res.Key)
@@ -59,7 +59,7 @@ func TestDBUpdateTx(t *testing.T) {
 	// Upsert record
 	db.Update(func(tx cqlx.Tx) error {
 
-		err := tx.Query(update).Put(&kv{Key: "5", Value: "val5"})
+		err := tx.Queryx(update).Put(&kv{Key: "5", Value: "val5"})
 		assert.Nil(t, err)
 
 		return err
@@ -69,7 +69,7 @@ func TestDBUpdateTx(t *testing.T) {
 	db.View(func(tx cqlx.Tx) error {
 
 		res := kv{}
-		err := tx.Query(get, "5").Get(&res)
+		err := tx.Queryx(get, "5").Get(&res)
 
 		assert.Equal(t, nil, err)
 		assert.Equal(t, "5", res.Key)
@@ -81,7 +81,7 @@ func TestDBUpdateTx(t *testing.T) {
 	// Remove record
 	db.Update(func(tx cqlx.Tx) error {
 
-		err := tx.Query(delete, "5").Exec()
+		err := tx.Queryx(delete, "5").Exec()
 		assert.Equal(t, nil, err)
 
 		return err

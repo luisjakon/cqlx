@@ -20,7 +20,10 @@ const (
 )
 
 //// Executex
-func executex(q *Query, item interface{}) error {
+func executex(q *Queryx, item interface{}) error {
+	if q == nil {
+		return ErrInvalidQuery
+	}
 	if item == nil {
 		return q.ExecRelease()
 	}
@@ -47,37 +50,37 @@ func executex(q *Query, item interface{}) error {
 }
 
 //// Queryx
-func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) Queryx {
+func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *Queryx {
 	var stmt string
 	var names []string
-	switch query := qry.(type) {
+	switch q := qry.(type) {
 	case *qb.SelectBuilder:
-		stmt, names = query.ToCql()
+		stmt, names = q.ToCql()
 	case *qb.InsertBuilder:
-		stmt, names = query.ToCql()
+		stmt, names = q.ToCql()
 	case *qb.UpdateBuilder:
-		stmt, names = query.ToCql()
+		stmt, names = q.ToCql()
 	case *qb.DeleteBuilder:
-		stmt, names = query.ToCql()
+		stmt, names = q.ToCql()
 	case *qb.BatchBuilder:
-		stmt, names = query.ToCql()
+		stmt, names = q.ToCql()
 	case string:
-		stmt, names = query, nil
+		stmt, names = q, nil
 	default:
-		return _NilQuery
+		return &Queryx{nil, 0}
 	}
 	if isMap(args...) {
-		return &Query{gocqlx.Query(sess.Query(stmt, args...), names).BindMap(args[0].(qb.M)), queryxType(qry)}
+		return &Queryx{gocqlx.Query(sess.Query(stmt, args...), names).BindMap(args[0].(qb.M)), queryxType(qry)}
 	}
-	return &Query{gocqlx.Query(sess.Query(stmt, args...), names), queryxType(qry)}
+	return &Queryx{gocqlx.Query(sess.Query(stmt, args...), names), queryxType(qry)}
 }
 
 //// Iterx
-func iterx(qry *gocqlx.Queryx) Iterx {
+func iterx(qry *gocqlx.Queryx) *Iterx {
 	if qry == nil {
-		return _NilIter
+		return &Iterx{}
 	}
-	return &Iter{qry.Iter()}
+	return &Iterx{qry.Iter()}
 }
 
 //// QueryxType

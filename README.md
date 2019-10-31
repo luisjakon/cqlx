@@ -73,19 +73,19 @@ func main() {
 	defer sess.Close()
 
 	// Insert record
-	err := sess.Query(put).Put(&kv{Key: "1", Value: "val1"})
+	err := sess.Queryx(put).Put(&kv{Key: "1", Value: "val1"})
 	if err != nil {
 		log.Fatal("insert error:", err)
 	}
 
 	// Retrieve record
-	err = sess.Query(get, "1").Get(&res)
+	err = sess.Queryx(get, "1").Get(&res)
 	if err != nil {
 		log.Fatal("get error:", err)
 	}
 
 	// Iterate through records
-	it := sess.Query(getall).Iter()
+	it := sess.Queryx(getall).Iter()
 	defer it.Close()
 
 	for it.Next(&res) {
@@ -93,7 +93,7 @@ func main() {
 	}
 
 	// Delete record
-	err = sess.Query(delete, "1").Exec()
+	err = sess.Queryx(delete, "1").Exec()
 	if err != nil {
 		log.Fatal("delete err:", err)
 	}

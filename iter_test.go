@@ -11,7 +11,7 @@ import (
 func TestRawIterScan(t *testing.T) {
 
 	sess := db.Session()
-	it := sess.Query(`SELECT * FROM kv;`).Iter() // `SELECT * FROM kv;`
+	it := sess.Queryx(`SELECT * FROM kv;`).Iter() // `SELECT * FROM kv;`
 
 	defer it.Close()
 	defer sess.Close()
@@ -27,7 +27,7 @@ func TestRawIterScan(t *testing.T) {
 func TestIterScan(t *testing.T) {
 
 	sess := db.Session()
-	it := sess.Query(qb.Select("kv").Limit(1)).Iter() // `SELECT * FROM kv LIMIT 1;`
+	it := sess.Queryx(qb.Select("kv").Limit(1)).Iter() // `SELECT * FROM kv LIMIT 1;`
 
 	defer it.Close()
 	defer sess.Close()
@@ -43,7 +43,7 @@ func TestIterScan(t *testing.T) {
 func TestIterScanAll(t *testing.T) {
 
 	sess := db.Session()
-	it := sess.Query(qb.Select("kv")).Iter() // `SELECT * FROM kv;`
+	it := sess.Queryx(qb.Select("kv")).Iter() // `SELECT * FROM kv;`
 
 	defer it.Close()
 	defer sess.Close()

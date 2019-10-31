@@ -15,35 +15,6 @@ var (
 	ErrNilIter          = errors.New("Invalid Iterator.")
 )
 
-type Closeable interface {
-	Close() error
-}
-
-type Database interface {
-	Open(dbkeyspace string, dbhosts ...string) error
-	View(func(Tx) error) error
-	Update(func(Tx) error) error
-	Session() Sessionx
-}
-
-type Sessionx interface {
-	Query(query interface{}, args ...interface{}) Queryx
-	Exec(stmnt interface{}) error
-	Closeable
-}
-
-type Queryx interface {
-	Get(res interface{}) error
-	Put(item interface{}) error
-	Exec() error
-	Iter() Iterx
-}
-
-type Iterx interface {
-	Next(interface{}) bool
-	Closeable
-}
-
 func isSlice(res interface{}) bool {
 	switch reflect.Indirect(reflect.ValueOf(res)).Kind() {
 	case reflect.Slice, reflect.Array:

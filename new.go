@@ -19,10 +19,10 @@ func NewSession(s *gocql.Session) *Session {
 	return &Session{s}
 }
 
-func NewQueryx(q *gocqlx.Queryx, typ QueryxType) *Query {
-	return &Query{q, typ}
+func NewQueryx(q *gocqlx.Queryx, typ QueryxType) *Queryx {
+	return &Queryx{q, typ}
 }
 
-func NewIter(it *gocqlx.Iterx) *Iter {
-	return &Iter{it}
+func NewIter(it *gocqlx.Iterx) *Iterx {
+	return &Iterx{it}
 }
