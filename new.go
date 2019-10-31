@@ -5,24 +5,24 @@ import (
 	"github.com/scylladb/gocqlx"
 )
 
-func NewDBWithConfig(c *gocql.ClusterConfig) *DB {
+func newDBWithConfig(c *gocql.ClusterConfig) *DB {
 	return &DB{c}
 }
 
-func NewDB(dbkeyspace string, dbhosts ...string) *DB {
+func newDB(dbkeyspace string, dbhosts ...string) *DB {
 	db := &DB{}
 	db.Open(dbkeyspace, dbhosts...)
 	return db
 }
 
-func NewSession(s *gocql.Session) *Session {
-	return &Session{s}
+func newSession(s *gocql.Session) *Sessionx {
+	return &Sessionx{s}
 }
 
-func NewQueryx(q *gocqlx.Queryx, typ QueryxType) *Queryx {
+func newQueryx(q *gocqlx.Queryx, typ QueryxType) *Queryx {
 	return &Queryx{q, typ}
 }
 
-func NewIter(it *gocqlx.Iterx) *Iterx {
+func newIter(it *gocqlx.Iterx) *Iterx {
 	return &Iterx{it}
 }

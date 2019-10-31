@@ -10,14 +10,6 @@ type DB struct {
 	*gocql.ClusterConfig
 }
 
-func OpenWithConfig(c *gocql.ClusterConfig) *DB {
-	return NewDBWithConfig(c)
-}
-
-func Open(dbkeyspace string, dbhosts ...string) *DB {
-	return NewDB(dbkeyspace, dbhosts...)
-}
-
 func (db *DB) Open(dbkeyspace string, dbhosts ...string) (err error) {
 	db.ClusterConfig = gocql.NewCluster(dbhosts...)
 	db.ClusterConfig.Keyspace = dbkeyspace
@@ -36,7 +28,7 @@ func (db *DB) Update(fn func(Tx) error) error {
 	return updatetx(s, fn)
 }
 
-func (db *DB) Session() *Session {
+func (db *DB) Session() *Sessionx {
 	if db.ClusterConfig == nil {
 		return _NilSession
 	}
@@ -45,7 +37,7 @@ func (db *DB) Session() *Session {
 		log.Printf(err.Error())
 		return _NilSession
 	}
-	return &Session{sess}
+	return &Sessionx{sess}
 }
 
 func (db *DB) Close() error {

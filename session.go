@@ -5,19 +5,19 @@ import (
 	"github.com/scylladb/gocqlx"
 )
 
-type Session struct {
+type Sessionx struct {
 	*gocql.Session
 }
 
-func (s *Session) Queryx(qry interface{}, args ...interface{}) *Queryx {
+func (s *Sessionx) Queryx(qry interface{}, args ...interface{}) *Queryx {
 	return queryx(s.Session, qry, args...)
 }
 
-func (s *Session) Exec(stmt interface{}, args ...interface{}) error {
+func (s *Sessionx) Exec(stmt interface{}, args ...interface{}) error {
 	return s.Queryx(stmt, args...).Exec()
 }
 
-func (s *Session) Close() error {
+func (s *Sessionx) Close() error {
 	s.Session.Close()
 	return nil
 }

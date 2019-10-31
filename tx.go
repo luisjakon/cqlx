@@ -1,12 +1,12 @@
 package cqlx
 
-type Tx = *Session
+type Tx = *Sessionx
 
 ///// PSEUDO-FUNCTIONAL FAKE TRANSACTIONS
-func viewtx(s *Session, fn func(tx Tx) error) error {
+func viewtx(s *Sessionx, fn func(tx Tx) error) error {
 	return fn(Tx(s))
 }
 
-func updatetx(s *Session, fn func(tx Tx) error) error {
+func updatetx(s *Sessionx, fn func(tx Tx) error) error {
 	return fn(Tx(s))
 }
