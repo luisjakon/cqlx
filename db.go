@@ -47,7 +47,7 @@ func (db *db) Session() Sessionx {
 		log.Printf(err.Error())
 		return _NilSession
 	}
-	return &session{sess}
+	return &Session{sess}
 }
 
 func (db *db) Close() error {

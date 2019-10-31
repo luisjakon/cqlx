@@ -20,7 +20,7 @@ const (
 )
 
 //// Executex
-func executex(q *query, item interface{}) error {
+func executex(q *Query, item interface{}) error {
 	if item == nil {
 		return q.ExecRelease()
 	}
@@ -67,9 +67,9 @@ func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) Queryx {
 		return _NilQuery
 	}
 	if isMap(args...) {
-		return &query{gocqlx.Query(sess.Query(stmt, args...), names).BindMap(args[0].(qb.M)), queryxType(qry)}
+		return &Query{gocqlx.Query(sess.Query(stmt, args...), names).BindMap(args[0].(qb.M)), queryxType(qry)}
 	}
-	return &query{gocqlx.Query(sess.Query(stmt, args...), names), queryxType(qry)}
+	return &Query{gocqlx.Query(sess.Query(stmt, args...), names), queryxType(qry)}
 }
 
 //// Iterx
@@ -77,7 +77,7 @@ func iterx(qry *gocqlx.Queryx) Iterx {
 	if qry == nil {
 		return _NilIter
 	}
-	return &iter{qry.Iter()}
+	return &Iter{qry.Iter()}
 }
 
 //// QueryxType

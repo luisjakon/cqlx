@@ -4,14 +4,14 @@ import (
 	"github.com/scylladb/gocqlx"
 )
 
-type iter struct {
+type Iter struct {
 	*gocqlx.Iterx
 }
 
-func (i iter) Next(dest interface{}) bool {
+func (i Iter) Next(dest interface{}) bool {
 	return i.Iterx.StructScan(dest)
 }
 
-func (i iter) Close() error {
+func (i Iter) Close() error {
 	return i.Iterx.Close()
 }
