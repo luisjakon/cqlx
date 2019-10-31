@@ -64,10 +64,7 @@ Example
 -------
 
 ```go
-/* Before you execute the program, Launch `cqlsh` and execute:
-create keyspace example with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-create table example.kv(key text, value text, PRIMARY KEY(id));
-*/
+//// Showcase most common use-cases and patterns when using structs and methods from this package
 package main
 
 import (
@@ -82,27 +79,31 @@ type kv struct {
 	Value string
 }
 
-var res kv
+var (
+	// pre-canned statements
+	createks  = `CREATE KEYSPACE IF NOT EXISTS example WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1 };`
+	createtbl = `CREATE TABLE IF NOT EXISTS example.kv (key text, value text, PRIMARY KEY (key));`
+	dropks    = `DROP KEYSPACE IF EXISTS example;`
+)
 
 var (
 	// pre-canned queries
-	getall = qb.Select("kv").Columns("*")                       // `SELECT * FROM kv;`
-	get    = qb.Select("kv").Where(qb.Eq("key"))                // `SELECT * FROM kv WHERE key=?;`
-	put    = qb.Update("kv").Set("value").Where(qb.Eq("key"))   // `UPDATE kv SET value=? WHERE key=?;`
-	delete = qb.Delete("kv").Where(qb.Eq("key"))                // `DELETE *  FROM kv WHERE key=?;`
+	getall = qb.Select("kv").Columns("*")                     // `SELECT * FROM kv;`
+	get    = qb.Select("kv").Where(qb.Eq("key"))              // `SELECT * FROM kv WHERE key=?;`
+	put    = qb.Update("kv").Set("value").Where(qb.Eq("key")) // `UPDATE kv SET value=? WHERE key=?;`
+	delete = qb.Delete("kv").Where(qb.Eq("key"))              // `DELETE *  FROM kv WHERE key=?;`
 )
 
-var db *cqlx.DB
+var (
+	res kv
+	db  *cqlx.DB
+)
 
 func main() {
-	// create db
-	createdb()
-	defer dropdb()
-
-	// set db keyspace 
+	// Update the underlying *gocql.ClusterConfig keyspace
 	db.Keyspace = "example"
 
-	// create session
+	// Create session
 	sess := db.Session()
 	defer sess.Close()
 
@@ -131,25 +132,24 @@ func main() {
 	if err != nil {
 		log.Fatal("delete err:", err)
 	}
+
+	// Remove db
+	execute(db, dropks)
 }
 
 func init() {
 	db = cqlx.Open("", "192.168.10.135")
-	db.Timeout = 6 * time.Second
+	execute(db, createks)
+	execute(db, createtbl)
 }
 
-func createdb() {
+func execute(db *cqlx.DB, stmt string) {
+	// Tap onto the underlying gocql.Query(...) interface via an auto-closing Tx
 	db.Update(func(tx cqlx.Tx) error {
-		tx.Exec(`CREATE KEYSPACE IF NOT EXISTS example WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1 };`)
-		return tx.Exec(`CREATE TABLE IF NOT EXISTS example.kv (key text, value text, PRIMARY KEY (key));`)
+		return tx.Query(stmt).Exec()
 	})
 }
 
-func dropdb() {
-	db.Update(func(tx cqlx.Tx) error {
-		return tx.Exec(`DROP KEYSPACE IF EXISTS example;`)
-	})
-}
 ```
 
 Package Dependencies
@@ -162,4 +162,4 @@ Package Dependencies
 License
 -------
 
-> Copyright (c) 2019 The Luis Jakón. All rights reserved.
+> Copyright (c) 2019 Luis Jakón. All rights reserved.
