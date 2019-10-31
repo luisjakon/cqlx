@@ -6,39 +6,37 @@ import (
 	"github.com/gocql/gocql"
 )
 
-type db struct {
+type DB struct {
 	*gocql.ClusterConfig
 }
 
-func OpenWithConfig(c *gocql.ClusterConfig) DB {
-	return &db{c}
+func OpenWithConfig(c *gocql.ClusterConfig) Database {
+	return NewDBWithConfig(c)
 }
 
-func Open(dbkeyspace string, dbhosts ...string) DB {
-	db := &db{}
-	db.Open(dbkeyspace, dbhosts...)
-	return db
+func Open(dbkeyspace string, dbhosts ...string) Database {
+	return NewDB(dbkeyspace, dbhosts...)
 }
 
-func (db *db) Open(dbkeyspace string, dbhosts ...string) (err error) {
+func (db *DB) Open(dbkeyspace string, dbhosts ...string) (err error) {
 	db.ClusterConfig = gocql.NewCluster(dbhosts...)
 	db.ClusterConfig.Keyspace = dbkeyspace
 	return
 }
 
-func (db *db) View(fn func(Tx) error) error {
+func (db *DB) View(fn func(Tx) error) error {
 	s := db.Session()
 	defer s.Close()
 	return viewtx(s, fn)
 }
 
-func (db *db) Update(fn func(Tx) error) error {
+func (db *DB) Update(fn func(Tx) error) error {
 	s := db.Session()
 	defer s.Close()
 	return updatetx(s, fn)
 }
 
-func (db *db) Session() Sessionx {
+func (db *DB) Session() Sessionx {
 	if db.ClusterConfig == nil {
 		return _NilSession
 	}
@@ -50,6 +48,6 @@ func (db *db) Session() Sessionx {
 	return &Session{sess}
 }
 
-func (db *db) Close() error {
+func (db *DB) Close() error {
 	return nil
 }

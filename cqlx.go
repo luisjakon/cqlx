@@ -19,7 +19,7 @@ type Closeable interface {
 	Close() error
 }
 
-type DB interface {
+type Database interface {
 	Open(dbkeyspace string, dbhosts ...string) error
 	View(func(Tx) error) error
 	Update(func(Tx) error) error
