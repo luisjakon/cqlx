@@ -10,11 +10,13 @@ import (
 
 func TestRawIterScan(t *testing.T) {
 
-	sess := db.Session()
-	it := sess.Queryx(`SELECT * FROM kv;`).Iter() // `SELECT * FROM kv;`
-
-	defer it.Close()
+	sess, err := db.Session()
 	defer sess.Close()
+
+	assert.Equal(t, nil, err)
+
+	it := sess.Queryx(`SELECT * FROM kv;`).Iter() // `SELECT * FROM kv;`
+	defer it.Close()
 
 	res := kv{}
 	ok := it.Next(&res)
@@ -26,11 +28,13 @@ func TestRawIterScan(t *testing.T) {
 
 func TestIterScan(t *testing.T) {
 
-	sess := db.Session()
-	it := sess.Queryx(qb.Select("kv").Limit(1)).Iter() // `SELECT * FROM kv LIMIT 1;`
-
-	defer it.Close()
+	sess, err := db.Session()
 	defer sess.Close()
+
+	assert.Equal(t, nil, err)
+
+	it := sess.Queryx(qb.Select("kv").Limit(1)).Iter() // `SELECT * FROM kv LIMIT 1;`
+	defer it.Close()
 
 	res := kv{}
 	ok := it.Next(&res)
@@ -42,11 +46,13 @@ func TestIterScan(t *testing.T) {
 
 func TestIterScanAll(t *testing.T) {
 
-	sess := db.Session()
-	it := sess.Queryx(qb.Select("kv")).Iter() // `SELECT * FROM kv;`
-
-	defer it.Close()
+	sess, err := db.Session()
 	defer sess.Close()
+
+	assert.Equal(t, nil, err)
+
+	it := sess.Queryx(qb.Select("kv")).Iter() // `SELECT * FROM kv;`
+	defer it.Close()
 
 	res := kv{}
 	for i := 4; it.Next(&res); i-- {

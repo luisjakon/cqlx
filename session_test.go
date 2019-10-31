@@ -8,23 +8,26 @@ import (
 )
 
 func TestSession(t *testing.T) {
-	sess := db.Session()
+	var res kv
+
+	sess, err := db.Session()
+	assert.Equal(t, nil, err)
 	defer sess.Close()
 
-	res := &kv{}
-	err := sess.Queryx(qb.Select("kv")).Get(res)
-
+	err = sess.Queryx(qb.Select("kv")).Get(&res)
 	assert.Equal(t, nil, err)
 }
 
 func TestSessionRawQuery(t *testing.T) {
-	sess := db.Session()
+	var res kv
+
+	sess, err := db.Session()
+	assert.Equal(t, nil, err)
 	defer sess.Close()
 
-	err := sess.Queryx("INSERT INTO kv (key,value) VALUES ('5','val5');").Exec()
+	err = sess.Queryx("INSERT INTO kv (key,value) VALUES ('5','val5');").Exec()
 	assert.Equal(t, nil, err)
 
-	res := kv{}
 	err = sess.Queryx(qb.Select("kv").Where(qb.Eq("key")), "5").Get(&res)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, res.Key, "5")

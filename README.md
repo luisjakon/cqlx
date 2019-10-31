@@ -80,7 +80,6 @@ type kv struct {
 }
 
 var (
-	// pre-canned statements
 	createks  = `CREATE KEYSPACE IF NOT EXISTS example WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1 };`
 	createtbl = `CREATE TABLE IF NOT EXISTS example.kv (key text, value text, PRIMARY KEY (key));`
 	dropks    = `DROP KEYSPACE IF EXISTS example;`
@@ -104,11 +103,14 @@ func main() {
 	db.Keyspace = "example"
 
 	// Create session
-	sess := db.Session()
+	sess, err := db.Session()
+	if err != nil {
+		panic(err)
+	}
 	defer sess.Close()
 
 	// Insert record
-	err := sess.Queryx(put).Put(&kv{Key: "1", Value: "val1"})
+	err = sess.Queryx(put).Put(&kv{Key: "1", Value: "val1"})
 	if err != nil {
 		log.Fatal("insert error:", err)
 	}

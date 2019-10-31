@@ -17,27 +17,31 @@ func (db *DB) Open(dbkeyspace string, dbhosts ...string) (err error) {
 }
 
 func (db *DB) View(fn func(Tx) error) error {
-	s := db.Session()
-	defer s.Close()
+	s, err := db.Session()
+	if err != nil {
+		return err
+	}
 	return viewtx(s, fn)
 }
 
 func (db *DB) Update(fn func(Tx) error) error {
-	s := db.Session()
-	defer s.Close()
+	s, err := db.Session()
+	if err != nil {
+		return err
+	}
 	return updatetx(s, fn)
 }
 
-func (db *DB) Session() *Sessionx {
+func (db *DB) Session() (*Sessionx, error) {
 	if db.ClusterConfig == nil {
-		return _NilSession
+		return nil, ErrInvalidCluster
 	}
 	sess, err := db.CreateSession()
 	if err != nil {
 		log.Printf(err.Error())
-		return _NilSession
+		return nil, err
 	}
-	return &Sessionx{sess}
+	return &Sessionx{sess}, nil
 }
 
 func (db *DB) Close() error {
