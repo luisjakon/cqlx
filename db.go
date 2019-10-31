@@ -38,7 +38,7 @@ func (db *db) Update(fn func(Tx) error) error {
 	return updatetx(s, fn)
 }
 
-func (db *db) Session() Session {
+func (db *db) Session() Sessionx {
 	if db.ClusterConfig == nil {
 		return _NilSession
 	}

@@ -23,10 +23,10 @@ type DB interface {
 	Open(dbkeyspace string, dbhosts ...string) error
 	View(func(Tx) error) error
 	Update(func(Tx) error) error
-	Session() Session
+	Session() Sessionx
 }
 
-type Session interface {
+type Sessionx interface {
 	Query(query interface{}, args ...interface{}) Queryx
 	Exec(stmnt interface{}) error
 	Closeable
