@@ -12,6 +12,9 @@ func (i Iterx) Next(dest interface{}) bool {
 	if i.Iterx == nil {
 		return false
 	}
+	if isSlice(dest) {
+		return i.Iterx.Select(dest) == nil // FIXME: should we log error msg if any?
+	}
 	return i.Iterx.StructScan(dest)
 }
 
