@@ -80,6 +80,7 @@ type kv struct {
 }
 
 var (
+	// pre-canned statements
 	createks  = `CREATE KEYSPACE IF NOT EXISTS example WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1 };`
 	createtbl = `CREATE TABLE IF NOT EXISTS example.kv (key text, value text, PRIMARY KEY (key));`
 	dropks    = `DROP KEYSPACE IF EXISTS example;`
@@ -146,7 +147,7 @@ func init() {
 }
 
 func execute(db *cqlx.DB, stmt string) {
-	// Tap onto the underlying gocql.Query(...) interface via an auto-closing Tx
+	// Use auto-closing pseudo-Tx 
 	db.Update(func(tx cqlx.Tx) error {
 		return tx.Query(stmt).Exec()
 	})
