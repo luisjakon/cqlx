@@ -34,7 +34,7 @@ func executex(q *Queryx, item interface{}) error {
 		}
 		return q.GetRelease(item)
 	case Insert:
-		return q.BindStruct(item).GetRelease(item)
+		return q.BindStruct(item).ExecRelease()
 	case Update:
 		return q.BindStruct(item).ExecRelease()
 	case Delete:
