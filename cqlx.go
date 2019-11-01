@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	ErrInvalidCluster   = errors.New("Invalid Cluster.")
+	ErrInvalidCluster   = errors.New("Invalid Cluster Config.")
 	ErrInvalidSession   = errors.New("Invalid Session.")
 	ErrInvalidQueryType = errors.New("Invalid Query Type.")
 	ErrInvalidQuery     = errors.New("Invalid Query.")
