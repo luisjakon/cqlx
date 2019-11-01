@@ -75,14 +75,14 @@ import (
 )
 
 type kv struct {
-	Key   string
+	Key   int
 	Value string
 }
 
 var (
 	// pre-canned statements
 	createks  = `CREATE KEYSPACE IF NOT EXISTS example WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1 };`
-	createtbl = `CREATE TABLE IF NOT EXISTS example.kv (key text, value text, PRIMARY KEY (key));`
+	createtbl = `CREATE TABLE IF NOT EXISTS example.kv (key int, value text, PRIMARY KEY (key));`
 	dropks    = `DROP KEYSPACE IF EXISTS example;`
 )
 
@@ -111,13 +111,13 @@ func main() {
 	defer sess.Close()
 
 	// Insert record
-	err = sess.Queryx(put).Put(&kv{Key: "1", Value: "val1"})
+	err = sess.Queryx(put).Put(&kv{1, "val1"})
 	if err != nil {
 		log.Fatal("insert error:", err)
 	}
 
 	// Retrieve record
-	err = sess.Queryx(get, "1").Get(&res)
+	err = sess.Queryx(get, 1).Get(&res)
 	if err != nil {
 		log.Fatal("get error:", err)
 	}
@@ -131,7 +131,7 @@ func main() {
 	}
 
 	// Delete record
-	err = sess.Queryx(delete, "1").Exec()
+	err = sess.Queryx(delete, 1).Exec()
 	if err != nil {
 		log.Fatal("delete err:", err)
 	}
