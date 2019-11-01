@@ -28,24 +28,16 @@ func executex(q *Queryx, item interface{}) error {
 		return q.ExecRelease()
 	}
 	switch q.typ {
-	case Select:
+	case Select, Raw:
 		if isSlice(item) {
 			return q.SelectRelease(item)
 		}
 		return q.GetRelease(item)
-	case Insert:
-		return q.BindStruct(item).ExecRelease()
-	case Update:
-		return q.BindStruct(item).ExecRelease()
-	case Delete:
-		return q.BindStruct(item).ExecRelease()
-	case Batch:
-		return q.BindStruct(item).ExecRelease()
-	case Raw:
-		if isSlice(item) {
-			return q.SelectRelease(item)
+	case Insert, Update, Delete, Batch:
+		if isMap(item) {
+			return q.BindMap(item.(qb.M)).ExecRelease()
 		}
-		return q.GetRelease(item)
+		return q.BindStruct(item).ExecRelease()
 	default:
 		log.Printf("CQLX: Unexpected query type -- %T", q.typ)
 		return ErrInvalidQueryType
@@ -59,6 +51,7 @@ func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *Queryx {
 	}
 	var stmt string
 	var names []string
+	var err error
 	switch q := qry.(type) {
 	case *qb.SelectBuilder:
 		stmt, names = q.ToCql()
@@ -71,7 +64,10 @@ func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *Queryx {
 	case *qb.BatchBuilder:
 		stmt, names = q.ToCql()
 	case string:
-		stmt, names = q, nil
+		stmt, names, err = gocqlx.CompileNamedQuery([]byte(q))
+		if err != nil {
+			stmt, names = q, nil
+		}
 	default:
 		return &Queryx{nil, 0}
 	}
