@@ -71,13 +71,13 @@ func drop_db() {
 	}
 }
 
-func newRawSession(keyspace, host string) (*gocql.Session, error) {
-	cluster := gocql.NewCluster(host)
-	cluster.Keyspace = keyspace
-	cluster.Consistency = gocql.LocalOne
-	cluster.ReconnectInterval = 6 * time.Second
-	cluster.Timeout = 3 * time.Second
-	return cluster.CreateSession()
+func newRawSession(keyspace, host string) (*cqlx.Sessionx, error) {
+	db := cqlx.Open(keyspace, host)
+	db.Keyspace = keyspace
+	db.Consistency = gocql.LocalOne
+	db.ReconnectInterval = 6 * time.Second
+	db.Timeout = 3 * time.Second
+	return db.Session()
 }
 
 func TestMain(m *testing.M) {
