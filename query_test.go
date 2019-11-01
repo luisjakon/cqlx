@@ -72,3 +72,30 @@ func TestGoCqlxQueryBuilder(t *testing.T) {
 	err = sess.Queryx(qb.Select("kv").Where(qb.Eq("key")), "6").Get(&res)
 	assert.NotEqual(t, nil, err)
 }
+
+func TestDeleteQuery(t *testing.T) {
+	var res kv
+
+	sess, err := db.Session()
+	assert.Equal(t, nil, err)
+	defer sess.Close()
+
+	err = sess.Queryx(qb.Select("kv").Where(qb.Eq("key")), "7").Get(&res)
+	assert.Equal(t, gocql.ErrNotFound, err)
+
+	err = sess.Queryx(qb.Insert("kv").Columns("key", "value")).Put(&kv{"7", "val7"})
+	assert.Equal(t, nil, err)
+
+	err = sess.Queryx(qb.Select("kv").Where(qb.Eq("key")), "7").Get(&res)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, "7", res.Key)
+	assert.Equal(t, "val7", res.Value)
+	assert.Equal(t, kv{"7", "val7"}, res)
+
+	err = sess.Queryx(qb.Delete("kv").Where(qb.Eq("key"))).Put(&kv{"7", ""})
+	assert.Equal(t, nil, err)
+
+	res = kv{}
+	err = sess.Queryx(qb.Select("kv").Where(qb.Eq("key")), "7").Get(&res)
+	assert.Equal(t, gocql.ErrNotFound, err)
+}

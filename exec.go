@@ -38,10 +38,13 @@ func executex(q *Queryx, item interface{}) error {
 	case Update:
 		return q.BindStruct(item).ExecRelease()
 	case Delete:
-		return q.ExecRelease()
+		return q.BindStruct(item).ExecRelease()
 	case Batch:
-		return q.ExecRelease()
+		return q.BindStruct(item).ExecRelease()
 	case Raw:
+		if isSlice(item) {
+			return q.SelectRelease(item)
+		}
 		return q.GetRelease(item)
 	default:
 		log.Printf("CQLX: Unexpected query type -- %T", q.typ)
