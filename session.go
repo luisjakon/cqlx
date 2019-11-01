@@ -17,6 +17,8 @@ func (s *Sessionx) Exec(stmt interface{}, args ...interface{}) error {
 }
 
 func (s *Sessionx) Close() error {
-	s.Session.Close()
+	if s.Session != nil {
+		s.Session.Close()
+	}
 	return nil
 }
