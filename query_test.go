@@ -3,6 +3,7 @@ package cqlx_test
 import (
 	"testing"
 
+	"github.com/gocql/gocql"
 	"github.com/scylladb/gocqlx/qb"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,7 +27,7 @@ func TestRawCQLQuery(t *testing.T) {
 	defer sess.Close()
 
 	err = sess.Queryx("SELECT * FROM kv WHERE key='5';").Get(&res)
-	assert.Equal(t, "not found", err.Error())
+	assert.Equal(t, gocql.ErrNotFound, err)
 
 	err = sess.Queryx("INSERT INTO kv (key,value) VALUES ('5','val5');").Exec()
 	assert.Equal(t, nil, err)
@@ -53,7 +54,7 @@ func TestGoCqlxQueryBuilder(t *testing.T) {
 	defer sess.Close()
 
 	err = sess.Queryx(qb.Select("kv").Where(qb.Eq("key")), "6").Get(&res)
-	assert.Equal(t, "not found", err.Error())
+	assert.Equal(t, gocql.ErrNotFound, err)
 
 	err = sess.Queryx(qb.Insert("kv").Columns("key", "value")).Put(&kv{"6", "val6"})
 	assert.Equal(t, nil, err)
