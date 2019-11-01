@@ -15,6 +15,7 @@ var (
 	ErrInvalidQueryType = errors.New("Invalid Query Type.")
 	ErrInvalidQuery     = errors.New("Invalid Query.")
 	ErrNilIter          = errors.New("Invalid Iterator.")
+	ErrNoHosts          = errors.New("Invalid Host(s) List.")
 )
 
 func OpenWithConfig(c *gocql.ClusterConfig) *DB {

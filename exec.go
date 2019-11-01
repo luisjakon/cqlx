@@ -51,6 +51,9 @@ func executex(q *Queryx, item interface{}) error {
 
 //// Queryx
 func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *Queryx {
+	if sess == nil {
+		return &Queryx{nil, 0}
+	}
 	var stmt string
 	var names []string
 	switch q := qry.(type) {
