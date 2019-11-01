@@ -2,28 +2,20 @@ package cqlx_test
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDB(t *testing.T) {
 	sess, err := newRawSession(dbkeyspace, dbhost)
 	defer sess.Close()
-	if err != nil {
-		t.Errorf("%T: %s", err, err.Error())
-	}
+	assert.Equal(t, nil, err)
 
 	keyspaceMetadata, err := sess.KeyspaceMetadata(dbkeyspace)
-	if err != nil {
-		t.Errorf("%T: %s", err, err.Error())
-	}
+	assert.Equal(t, nil, err)
 
 	for _, table := range keyspaceMetadata.Tables {
-		// Check keyspace exists
-		if table.Keyspace != "cqlx_test_db" {
-			t.Error("Invalid keyspace")
-		}
-		// Check kv table exists
-		if table.Name != "kv" {
-			t.Error("Invalid table")
-		}
+		assert.Equal(t, "cqlx_test_db", table.Keyspace)
+		assert.Equal(t, "kv", table.Name)
 	}
 }
