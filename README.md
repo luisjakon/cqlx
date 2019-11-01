@@ -14,9 +14,9 @@ Installation
 Features
 --------
 
-* Handles both raw CQL statements and ```scylladb/gocqlx``` query builders indiscriminately
+* Automatically processes both raw CQL statements and ```scylladb/gocqlx``` query builders
 * Provides full pass-thru access to the underlying structs and methods built into the venerable ```gocql/gocql``` and ```scylladb/gocqlx``` client packages
-* Processes single-shot, autoclosing transactions via the db.Tx(...) interface
+* Handles single-shot autoclosing pseudo-transactions via the db.Tx(...) interface
 
 
 Example of correct Tx usage:
