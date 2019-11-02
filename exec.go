@@ -34,8 +34,8 @@ func executex(q *Queryx, item interface{}) error {
 		}
 		return q.GetRelease(item)
 	case Insert, Update, Delete, Batch:
-		if isMap(item) {
-			return q.BindMap(item.(qb.M)).ExecRelease()
+		if m := asMap(item); m != nil {
+			return q.BindMap(m).ExecRelease()
 		}
 		return q.BindStruct(item).ExecRelease()
 	default:
@@ -71,11 +71,11 @@ func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *Queryx {
 	default:
 		return &Queryx{nil, 0}
 	}
-	if isMap(args...) {
-		return &Queryx{gocqlx.Query(sess.Query(stmt), names).BindMap(*args[0].(*qb.M)), queryxType(qry)}
+	if m := asMap(args...); m != nil {
+		return &Queryx{gocqlx.Query(sess.Query(stmt), names).BindMap(m), queryxType(qry)}
 	}
-	if isStruct(args...) {
-		return &Queryx{gocqlx.Query(sess.Query(stmt), names).BindStruct(args[0]), queryxType(qry)}
+	if s := asStruct(args...); s != nil {
+		return &Queryx{gocqlx.Query(sess.Query(stmt), names).BindStruct(s), queryxType(qry)}
 	}
 	return &Queryx{gocqlx.Query(sess.Query(stmt, args...), names), queryxType(qry)}
 }
