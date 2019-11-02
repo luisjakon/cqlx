@@ -72,7 +72,7 @@ func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *Queryx {
 		return &Queryx{nil, 0}
 	}
 	if isMap(args...) {
-		return &Queryx{gocqlx.Query(sess.Query(stmt), names).BindMap(args[0].(qb.M)), queryxType(qry)}
+		return &Queryx{gocqlx.Query(sess.Query(stmt), names).BindMap(*args[0].(*qb.M)), queryxType(qry)}
 	}
 	if isStruct(args...) {
 		return &Queryx{gocqlx.Query(sess.Query(stmt), names).BindStruct(args[0]), queryxType(qry)}

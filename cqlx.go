@@ -50,7 +50,7 @@ func isMap(args ...interface{}) bool {
 	if len(args) != 1 {
 		return false
 	}
-	_, ok := args[0].(qb.M)
+	_, ok := args[0].(*qb.M)
 	return ok
 }
 
