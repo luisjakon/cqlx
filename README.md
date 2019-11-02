@@ -89,14 +89,6 @@ var (
 )
 
 var (
-	// pre-canned queries
-	getall = qb.Select("kv").Columns("*")                     // `SELECT * FROM kv;`
-	get    = qb.Select("kv").Where(qb.Eq("key"))              // `SELECT * FROM kv WHERE key=?;`
-	put    = qb.Update("kv").Set("value").Where(qb.Eq("key")) // `UPDATE kv SET value=? WHERE key=?;`
-	delete = qb.Delete("kv").Where(qb.Eq("key"))              // `DELETE *  FROM kv WHERE key=?;`
-)
-
-var (
 	res kv
 	db  *cqlx.DB
 )
@@ -112,49 +104,48 @@ func main() {
 	}
 	defer sess.Close()
 
-	// Insert record
-	err = sess.Queryx(put).Put(&kv{1, "val1"})
-	if err != nil {
-		log.Fatal("insert error:", err)
-	}
+	// Insert record using raw cql statements
+	sess.Queryx(`INSERT INTO kv (key, value) VALUES (:key, :value)`, &kv{0, "v0"}).Exec()
 
-	// Retrieve record
-	err = sess.Queryx(get, 1).Get(&res)
-	if err != nil {
-		log.Fatal("get error:", err)
-	}
+	// Insert record using gocqlx query builder package
+	sess.Queryx(qb.Insert("kv").Columns("key", "value")).Put(&kv{1, "v1"})
+
+	// Retrieve record using raw cql statements
+	sess.Queryx(`SELECT * FROM kv WHERE key=:key`, 0).Get(&res)
+
+	// Retrieve record using gocqlx query builder package
+	sess.Queryx(qb.Select("kv").Where(qb.Eq("key")), 1).Get(&res)
 
 	// Iterate through records
-	it := sess.Queryx(getall).Iter()
+	it := sess.Queryx(qb.Select("kv")).Iter()
 	defer it.Close()
 
 	for it.Next(&res) {
 		log.Printf("res: %+v", res)
 	}
 
-	// Delete record
-	err = sess.Queryx(delete, 1).Exec()
-	if err != nil {
-		log.Fatal("delete err:", err)
-	}
+	// Delete record using raw cql statements
+	err = sess.Queryx(`DELETE FROM kv WHERE key=:key`, 0).Exec()
+
+	// Delete record using gocqlx query builder package
+	sess.Queryx(qb.Delete("kv").Where(qb.Eq("key")), 1).Exec()
 
 	// Remove db
 	execute(db, dropks)
 }
 
 func init() {
-	db = cqlx.Open("", "192.168.10.135")
+	db = cqlx.Open("", "192.168.1.161")
 	execute(db, createks)
 	execute(db, createtbl)
 }
 
 func execute(db *cqlx.DB, stmt string) {
-	// Use auto-closing pseudo-Tx 
+	// Use auto-closing pseudo-Tx
 	db.Update(func(tx cqlx.Tx) error {
 		return tx.Query(stmt).Exec()
 	})
 }
-
 ```
 
 Package Dependencies
