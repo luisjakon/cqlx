@@ -105,7 +105,7 @@ func main() {
 	defer sess.Close()
 
 	// Insert record using raw cql statements
-	sess.Queryx(`INSERT INTO kv (key, value) VALUES (:key, :value)`, &kv{0, "v0"}).Exec()
+	sess.Queryx(`INSERT INTO kv (key, value) VALUES (:key, :value)`).Put(&kv{0, "v0"})
 
 	// Insert record using gocqlx query builder package
 	sess.Queryx(qb.Insert("kv").Columns("key", "value")).Put(&kv{1, "v1"})
@@ -125,7 +125,7 @@ func main() {
 	}
 
 	// Delete record using raw cql statements
-	err = sess.Queryx(`DELETE FROM kv WHERE key=:key`, 0).Exec()
+	sess.Queryx(`DELETE FROM kv WHERE key=:key`, 0).Exec()
 
 	// Delete record using gocqlx query builder package
 	sess.Queryx(qb.Delete("kv").Where(qb.Eq("key")), 1).Exec()
