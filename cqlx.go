@@ -46,36 +46,29 @@ func isSlice(res interface{}) bool {
 	return false
 }
 
+func isMap(arg interface{}) bool {
+	return reflect.Map == reflect.Indirect(reflect.ValueOf(arg)).Kind()
+}
+
+func isStruct(arg interface{}) bool {
+	return reflect.Struct == reflect.Indirect(reflect.ValueOf(arg)).Kind()
+}
+
 func asMap(args ...interface{}) qb.M {
-	if len(args) == 0 {
-		return nil
-	}
-	if m, ok := args[0].(qb.M); ok {
-		return m
-	}
-	if m, ok := args[0].(*qb.M); ok {
-		return *m
+	if len(args) == 1 {
+		if m, ok := args[0].(qb.M); ok {
+			return m
+		}
+		if m, ok := args[0].(*qb.M); ok {
+			return *m
+		}
 	}
 	return nil
 }
 
 func asStruct(args ...interface{}) interface{} {
-	if isStruct(args...) {
+	if len(args) == 1 && isStruct(args[0]) {
 		return args[0]
 	}
 	return nil
-}
-
-func isMap(args ...interface{}) bool {
-	if len(args) != 1 {
-		return false
-	}
-	return reflect.Map == reflect.Indirect(reflect.ValueOf(args[0])).Kind()
-}
-
-func isStruct(args ...interface{}) bool {
-	if len(args) != 1 {
-		return false
-	}
-	return reflect.Struct == reflect.Indirect(reflect.ValueOf(args[0])).Kind()
 }
