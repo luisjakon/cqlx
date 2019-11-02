@@ -28,11 +28,19 @@ func executex(q *Queryx, item interface{}) error {
 		return q.ExecRelease()
 	}
 	switch q.typ {
-	case Select, Raw:
+	case Select:
 		if isSlice(item) {
 			return q.SelectRelease(item)
 		}
 		return q.GetRelease(item)
+	case Raw:
+		if q.Statement()[0] == 'S' {
+			if isSlice(item) {
+				return q.SelectRelease(item)
+			}
+			return q.GetRelease(item)
+		}
+		fallthrough
 	case Insert, Update, Delete, Batch:
 		if m := asMap(item); m != nil {
 			return q.BindMap(m).ExecRelease()

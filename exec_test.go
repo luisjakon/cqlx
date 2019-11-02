@@ -55,3 +55,17 @@ func TestCompiledQueriesWithMaps(t *testing.T) {
 	assert.Equal(t, gocql.ErrNotFound, err)
 
 }
+
+func TestCompiledQueriesInsertWithStruct(t *testing.T) {
+
+	sess, err := db.Session()
+	defer sess.Close()
+
+	assert.Equal(t, nil, err)
+
+	var val qb.M = qb.M{"key": "100", "value": "val100"}
+
+	err = sess.Queryx(`INSERT INTO kv (key, value) VALUES (:key, :value)`).Put(&val)
+	assert.Equal(t, nil, err)
+
+}
