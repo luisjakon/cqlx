@@ -40,22 +40,24 @@ Extensibility
 
 * Extended usage of cqlx package structs:
 
-Example of setting the client connection timeout
+Example of setting the cqlx.DB cluster connection properties
 ```go
 db := cqlx.Open("example", "192.168.1.225")
+db.Consistency = gocql.LocalOne
 db.Timeout = 3 * time.Second
+db.ReconnectInterval = 6 * time.Second
 ```
 
-Example of setting the session page size
+Example of setting the cqlx.Session properties
 ```go
 sess := db.Session()
 sess.SetPageSize(-1)
 ```
 
-Example of adjusting a queryx consistency level
+Example of setting the cqlx.Queryx properties
 ```go
-qry = sess.Queryx("SELECT * FROM kv WHERE key='1'")
-err := qry.Consistency(1).Get(&res)
+qry = sess.Queryx("SELECT * FROM kv WHERE key='1'").Consistency(1)
+err := qry.Get(&res)
 ```
 Since all cqlx structs derive from the base gocql and gocqlx packages, all of their implemented features are immediately available to the caller.
 
