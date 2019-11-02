@@ -53,3 +53,10 @@ func isMap(args ...interface{}) bool {
 	_, ok := args[0].(qb.M)
 	return ok
 }
+
+func isStruct(args ...interface{}) bool {
+	if len(args) != 1 {
+		return false
+	}
+	return reflect.Struct == reflect.Indirect(reflect.ValueOf(args[0])).Kind()
+}
