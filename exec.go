@@ -2,6 +2,7 @@ package cqlx
 
 import (
 	"log"
+	"reflect"
 
 	"github.com/gocql/gocql"
 	"github.com/scylladb/gocqlx"
@@ -71,9 +72,6 @@ func queryx(sess *gocql.Session, qry interface{}, args ...interface{}) *Queryx {
 	default:
 		return &Queryx{nil, 0}
 	}
-	if isMap(args...) {
-		return &Queryx{gocqlx.Query(sess.Query(stmt, args...), names).BindMap(args[0].(qb.M)), queryxType(qry)}
-	}
 	return &Queryx{gocqlx.Query(sess.Query(stmt, args...), names), queryxType(qry)}
 }
 
@@ -103,4 +101,11 @@ func queryxType(qry interface{}) QueryxType {
 	default:
 		return 0
 	}
+}
+
+func isStruct(args ...interface{}) bool {
+	if len(args) != 1 {
+		return false
+	}
+	return reflect.Indirect(reflect.ValueOf(args[0])).Kind() == reflect.Struct
 }
