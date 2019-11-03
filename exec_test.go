@@ -56,7 +56,7 @@ func TestCompiledQueriesWithMaps(t *testing.T) {
 
 }
 
-func TestCompiledQueriesInsertWithStruct(t *testing.T) {
+func TestCompiledQueries(t *testing.T) {
 
 	sess, err := db.Session()
 	defer sess.Close()
@@ -66,6 +66,9 @@ func TestCompiledQueriesInsertWithStruct(t *testing.T) {
 	var val qb.M = qb.M{"key": "100", "value": "val100"}
 
 	err = sess.Queryx(`INSERT INTO kv (key, value) VALUES (:key, :value)`).Put(&val)
+	assert.Equal(t, nil, err)
+
+	err = sess.Queryx(`DELETE FROM kv WHERE key=:key`).Put(&val)
 	assert.Equal(t, nil, err)
 
 }
