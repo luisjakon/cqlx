@@ -56,11 +56,15 @@ func isStruct(arg interface{}) bool {
 
 func asMap(args ...interface{}) qb.M {
 	if len(args) == 1 {
-		if m, ok := args[0].(qb.M); ok {
+		switch m := args[0].(type) {
+		case qb.M:
 			return m
-		}
-		if m, ok := args[0].(*qb.M); ok {
+		case *qb.M:
 			return *m
+		case map[string]interface{}:
+			return qb.M(m)
+		case *map[string]interface{}:
+			return qb.M(*m)
 		}
 	}
 	return nil

@@ -32,14 +32,38 @@ func TestCompiledQueriesWithStructs(t *testing.T) {
 
 }
 
-func TestCompiledQueriesWithMaps(t *testing.T) {
+func TestCompiledQueriesWithQbMaps(t *testing.T) {
 
 	sess, err := db.Session()
 	defer sess.Close()
 
 	assert.Equal(t, nil, err)
 
-	var val qb.M = qb.M{"key": "100", "value": "val100"}
+	var val = qb.M{"key": "101", "value": "val101"}
+	var res kv
+
+	err = sess.Queryx(`INSERT INTO kv (key, value) VALUES (:key, :value)`, &val).Exec()
+	assert.Equal(t, nil, err)
+
+	err = sess.Queryx(`SELECT * FROM kv WHERE key=:key`, &val).Get(&res)
+	assert.Equal(t, nil, err)
+
+	err = sess.Queryx(`DELETE FROM kv WHERE key=:key`, &val).Exec()
+	assert.Equal(t, nil, err)
+
+	err = sess.Queryx(`SELECT * FROM kv WHERE key=:key`, &val).Get(&res)
+	assert.Equal(t, gocql.ErrNotFound, err)
+
+}
+
+func TestCompiledQueriesWithGolangMaps(t *testing.T) {
+
+	sess, err := db.Session()
+	defer sess.Close()
+
+	assert.Equal(t, nil, err)
+
+	var val = map[string]interface{}{"key": "102", "value": "val102"}
 	var res kv
 
 	err = sess.Queryx(`INSERT INTO kv (key, value) VALUES (:key, :value)`, &val).Exec()
@@ -63,7 +87,7 @@ func TestCompiledQueries(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 
-	var val qb.M = qb.M{"key": "100", "value": "val100"}
+	var val = qb.M{"key": "103", "value": "val103"}
 
 	err = sess.Queryx(`INSERT INTO kv (key, value) VALUES (:key, :value)`).Put(&val)
 	assert.Equal(t, nil, err)
