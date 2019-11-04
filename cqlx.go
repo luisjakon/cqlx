@@ -18,12 +18,14 @@ var (
 	ErrNoHosts          = errors.New("Invalid Host(s) List.")
 )
 
-func OpenWithConfig(c *gocql.ClusterConfig) *DB {
+func Open(dbkeyspace string, dbhosts ...string) *DB {
+	c := gocql.NewCluster(dbhosts...)
+	c.Keyspace = dbkeyspace
 	return newDBWithConfig(c)
 }
 
-func Open(dbkeyspace string, dbhosts ...string) *DB {
-	return newDB(dbkeyspace, dbhosts...)
+func OpenWithConfig(c *gocql.ClusterConfig) *DB {
+	return newDBWithConfig(c)
 }
 
 func Session(s *gocql.Session) *Sessionx {
@@ -66,6 +68,7 @@ func asMap(args ...interface{}) qb.M {
 		case *map[string]interface{}:
 			return qb.M(*m)
 		}
+
 	}
 	return nil
 }

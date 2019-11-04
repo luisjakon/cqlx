@@ -9,12 +9,6 @@ func newDBWithConfig(c *gocql.ClusterConfig) *DB {
 	return &DB{c}
 }
 
-func newDB(dbkeyspace string, dbhosts ...string) *DB {
-	db := &DB{}
-	db.Open(dbkeyspace, dbhosts...)
-	return db
-}
-
 func newSession(s *gocql.Session) *Sessionx {
 	return &Sessionx{s}
 }
