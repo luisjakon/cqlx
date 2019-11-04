@@ -1,7 +1,7 @@
 cqlx
 =====
 
-Package cqlx provides seamless integration for working with ```gocql/gocql``` raw queries and ```scylladb/gocqlx``` query-builders via a uniform API
+Package cqlx provides simple inobstrusive bindings for handling raw ```gocql/gocql``` queries and ```scylladb/gocqlx``` query-builders via an uniform API.
 
 Project Website: https://github.com/luisjakon/cqlx<br>
 
