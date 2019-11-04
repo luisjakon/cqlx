@@ -13,7 +13,7 @@ func (s *Sessionx) Queryx(qry interface{}, args ...interface{}) *Queryx {
 }
 
 func (s *Sessionx) Exec(stmt interface{}, args ...interface{}) error {
-	return s.Queryx(stmt, args...).Exec()
+	return queryx(s.Session, stmt, args...).Exec()
 }
 
 func (s *Sessionx) Close() error {
