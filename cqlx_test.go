@@ -21,7 +21,7 @@ type kv struct {
 }
 
 func init() {
-	flag.StringVar(&dbhost, "dbhost", "192.168.10.135", "cassandra host(s)")
+	flag.StringVar(&dbhost, "dbhost", "localhost", "cassandra host(s)")
 	flag.StringVar(&dbkeyspace, "ks", "cqlx_test_db", "cassandra keyspace")
 }
 

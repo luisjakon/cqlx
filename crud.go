@@ -15,14 +15,14 @@ func (c Crud) Query(sess *Sessionx, stmt interface{}, args ...interface{}) *Quer
 	return sess.Queryx(stmt, args...)
 }
 
-func (c Crud) Get(sess *Sessionx, item, res interface{}) error {
+func (c Crud) Select(sess *Sessionx, args ...interface{}) *Queryx {
 	switch s := c.SelectQuery.(type) {
 	case *qb.SelectBuilder:
-		return sess.Queryx(s, item).Get(res)
+		return sess.Queryx(s, args...)
 	case string:
-		return sess.Queryx(s, item).Get(res)
+		return sess.Queryx(s, args...)
 	}
-	return ErrInvalidQuery
+	return _NilQuery
 }
 
 func (c Crud) Insert(sess *Sessionx, newitem interface{}) error {

@@ -186,7 +186,7 @@ func main() {
 	// Use available crud methods
 	kvdb.Insert(sess, &kv{2, "val2"})
 	kvdb.Update(sess, &kv{2, "val3"})
-	kvdb.Get(sess, &kv{Key: 2}, &res)
+	kvdb.Select(sess, &kv{Key: 2}).Get(&res)
 	kvdb.Delete(sess, &kv{Key: 2})
 
 	// Use explicit raw queries 
