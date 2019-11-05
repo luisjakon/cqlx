@@ -175,7 +175,7 @@ func main() {
 	sess, _ := cqlx.Open("example", "192.168.1.161").Session()
 	defer sess.Close()
 
-	// Create simple cqlx crud struct
+	// Create crud struct
 	kvdb := cqlx.Crud{
 		`SELECT * FROM kv WHERE key=:key`,
 		`INSERT INTO kv (key, value) VALUES (:key, :value)`,
@@ -183,11 +183,17 @@ func main() {
 		`DELETE FROM kv WHERE key=:key`,
 	}
 
-	// Use cqlx crud methods
+	// Use available crud methods
 	kvdb.Insert(sess, &kv{2, "val2"})
 	kvdb.Update(sess, &kv{2, "val3"})
 	kvdb.Get(sess, &kv{Key: 2}, &res)
 	kvdb.Delete(sess, &kv{Key: 2})
+
+	// Use explicit raw queries 
+	kvdb.Query(sess, `SELECT value FROM kv WHERE key=:key`, &kv{Key: 2}).Get(&res)
+
+	// Or gocqlx.qb queries instead
+	kvdb.Query(sess, qb.Select("kv").Where(qb.Eq("key")), &kv{Key: 2}).Get(&res)
 
 	...
 }
