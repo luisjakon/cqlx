@@ -147,3 +147,27 @@ func TestQbCrudDirect(t *testing.T) {
 	assert.Equal(t, nil, err)
 
 }
+
+func TestCrudQueryRaw(t *testing.T) {
+
+	sess, err := db.Session()
+	defer sess.Close()
+
+	assert.Equal(t, nil, err)
+
+	var kvdb cqlx.Crud
+	var res kv
+
+	err = kvdb.Query(sess, `INSERT INTO kv (key, value) VALUES (:key, :value)`).Put(&kv{"201", "val201"})
+	assert.Equal(t, nil, err)
+
+	err = kvdb.Query(sess, `SELECT * FROM kv WHERE key=:key`, &kv{Key: "201"}).Get(&res)
+	assert.Equal(t, nil, err)
+
+	assert.Equal(t, "201", res.Key)
+	assert.Equal(t, "val201", res.Value)
+
+	err = kvdb.Query(sess, `DELETE FROM kv WHERE key=:key`, "201").Exec()
+	assert.Equal(t, nil, err)
+
+}

@@ -11,6 +11,10 @@ type Crud struct {
 	DeleteQuery interface{}
 }
 
+func (c Crud) Query(sess *Sessionx, stmt interface{}, args ...interface{}) *Queryx {
+	return sess.Queryx(stmt, args...)
+}
+
 func (c Crud) Get(sess *Sessionx, item, res interface{}) error {
 	switch s := c.SelectQuery.(type) {
 	case *qb.SelectBuilder:
