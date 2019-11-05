@@ -148,6 +148,52 @@ func execute(db *cqlx.DB, stmt string) {
 }
 ```
 
+
+CRUD Example (New)
+-------
+
+```go
+//// Showcase CRUD-like utilities from this package
+package main
+
+import (
+	"fmt"
+
+	"github.com/luisjakon/cqlx"
+)
+
+type kv struct {
+	Key   int
+	Value string
+}
+
+var res kv
+
+func main() {
+
+	// Create session
+	sess, _ := cqlx.Open("example", "192.168.1.161").Session()
+	defer sess.Close()
+
+	// Create simple cqlx crud struct
+	kvdb := cqlx.Crud{
+		`SELECT * FROM kv WHERE key=:key`,
+		`INSERT INTO kv (key, value) VALUES (:key, :value)`,
+		`UPDATE kv SET value=:value WHERE key=:key IF EXISTS`,
+		`DELETE FROM kv WHERE key=:key`,
+	}
+
+	// Use cqlx crud methods
+	kvdb.Insert(sess, &kv{2, "val2"})
+	kvdb.Update(sess, &kv{2, "val3"})
+	kvdb.Get(sess, &kv{Key: 2}, &res)
+	kvdb.Delete(sess, &kv{Key: 2})
+
+	...
+}
+```
+
+
 Package Dependencies
 ---------
 
