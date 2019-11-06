@@ -83,7 +83,9 @@ func newRawSession(keyspace, host string) (*cqlx.Sessionx, error) {
 func TestMain(m *testing.M) {
 	init_flags()
 	init_db()
+	init_bench_db()
 	code := m.Run()
+	drop_bench_db()
 	drop_db()
 	os.Exit(code)
 }
