@@ -1,7 +1,6 @@
 cqlx
 =====
-
-Package cqlx seamlessly integrates and extends the advanced query and session management capabilities of the venerable ```gocql/gocql``` and ```scylladb/gocqlx``` packages.
+Package cqlx provides unified bindings for handling [gocql/gocql](https://github.com/gocql/gocql) raw cql statements and [scylladb/gocqlx](https://github.com/scylladb/gocqlx/tree/master/qb) query-builders
 
 Project Website: https://github.com/luisjakon/cqlx<br>
 
@@ -14,10 +13,10 @@ Installation
 Features
 --------
 
-* Delivers an ultra-simple-to-use, inobstrusive abstraction layer and an uniform development API
+* Delivers an uniform abstraction layer along with an ultra-simple-to-use, inobstrusive development API 
 * Enables simple, easy-to-use CRUD-like interactions via ```cqlx.Crud``` structs
-* Automatically detects and handles both raw CQL statements and ```scylladb/gocqlx``` query builders
-* Allows full, pass-thru access to all underlying ```gocql/gocql``` and ```scylladb/gocqlx``` structs and methods
+* Works with either ```gocql/gocql``` raw cql statements and/or ```scylladb/gocqlx``` query builders indiscriminately
+* Provides full (pass-thru) access to all underlying ```gocql/gocql``` and ```scylladb/gocqlx``` structs and methods
 * Handles single-shot autoclosing pseudo-transactions via the ```db.Tx(...)``` interface
 
 
