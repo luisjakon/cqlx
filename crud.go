@@ -40,7 +40,7 @@ func (c Crud) Update(sess *Sessionx, item interface{}) error {
 	case *qb.UpdateBuilder:
 		return sess.Queryx(s.Existing()).Put(item)
 	case string:
-		return sess.Queryx(s).Put(item)
+		return sess.Queryx(s).Put(item) // TODO: check for `IF EXISTS` to avoid upserts
 	}
 	return ErrInvalidQuery
 }
