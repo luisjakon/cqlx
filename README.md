@@ -1,7 +1,7 @@
 cqlx
 =====
 
-Package cqlx provides simple inobstrusive bindings for handling raw ```gocql/gocql``` queries and ```scylladb/gocqlx``` query-builders via an uniform API.
+Package cqlx seamlessly integrates and extends the advanced query and session management capabilities of the venerable ```gocql/gocql``` and ```scylladb/gocqlx``` packages.
 
 Project Website: https://github.com/luisjakon/cqlx<br>
 
@@ -14,9 +14,11 @@ Installation
 Features
 --------
 
-* Automatically processes both raw CQL statements and ```scylladb/gocqlx``` query builders
-* Provides full pass-thru access to the underlying structs and methods built into the venerable ```gocql/gocql``` and ```scylladb/gocqlx``` client packages
-* Handles single-shot autoclosing pseudo-transactions via the db.Tx(...) interface
+* Delivers an ultra-simple-to-use, inobstrusive abstraction layer and an uniform development API
+* Enables simple, easy-to-use CRUD-like interactions via ```cqlx.Crud``` structs
+* Automatically detects and handles both raw CQL statements and ```scylladb/gocqlx``` query builders
+* Allows full, pass-thru access to all underlying ```gocql/gocql``` and ```scylladb/gocqlx``` structs and methods
+* Handles single-shot autoclosing pseudo-transactions via the ```db.Tx(...)``` interface
 
 
 Example of correct Tx usage:
@@ -35,12 +37,43 @@ err := db.Tx(func(tx cqlx.Tx) error {
 Since the transaction is managed there is no need to issue a deferred closing.
 
 
+ CRUD Interaction
+-------
+
+Example of using ```cqlx.Crud``` structs and functions
+```go
+// Create crud struct
+kvdb := cqlx.Crud{
+	`SELECT * FROM kv WHERE key=:key`,
+	`INSERT INTO kv (key, value) VALUES (:key, :value)`,
+	`UPDATE kv SET value=:value WHERE key=:key IF EXISTS`,
+	`DELETE FROM kv WHERE key=:key`,
+}
+
+// Open a cluster connection
+sess, _ := cqlx.Open("example", "192.168.1.161").Session()
+
+// Use available crud methods
+kvdb.Insert(sess, &kv{2, "val2"})
+kvdb.Update(sess, &kv{2, "val3"})
+kvdb.Select(sess, &kv{Key: 2}).Get(&res)
+kvdb.Delete(sess, &kv{Key: 2})
+
+// Use explicit raw cql queries
+kvdb.Query(sess, `SELECT value FROM kv WHERE key=:key`, &kv{Key: 2}).Get(&res)
+
+// Use gocqlx.qb queries
+kvdb.Query(sess, qb.Select("kv").Columns("value").Where(qb.Eq("key")), &kv{Key: 2}).Get(&res)
+```
+While not a necessity, making use of ```cqlx.Crud``` in your code can significantly simplify and standardize access patterns to otherwise complex cql tables.
+
+
 Extensibility
 --------
 
-* Extended usage of cqlx package structs:
+* Extended usage of package structs:
 
-Example of setting the cqlx.DB cluster connection properties
+Example of setting the ```cqlx.DB``` connection properties
 ```go
 db := cqlx.Open("example", "192.168.1.225")
 db.Consistency = gocql.LocalOne
@@ -48,15 +81,15 @@ db.Timeout = 3 * time.Second
 db.ReconnectInterval = 6 * time.Second
 ```
 
-Example of setting the cqlx.Session properties
+Example of setting the ```cqlx.Session``` properties
 ```go
 sess := db.Session()
 sess.SetPageSize(-1)
 ```
 
-Example of setting the cqlx.Queryx properties
+Example of setting the ```cqlx.Queryx``` properties
 ```go
-qry = sess.Queryx("SELECT * FROM kv WHERE key='1'").Consistency(1)
+qry := sess.Queryx("SELECT * FROM kv WHERE key='1'").Consistency(1)
 err := qry.Get(&res)
 ```
 Since all cqlx structs derive from the base gocql and gocqlx packages, all of their implemented features are immediately available to the caller.
@@ -145,57 +178,6 @@ func execute(db *cqlx.DB, stmt string) {
 	db.Update(func(tx cqlx.Tx) error {
 		return tx.Query(stmt).Exec()
 	})
-}
-```
-
-
-CRUD Example (New)
--------
-
-```go
-//// Showcase CRUD-like utilities from this package
-package main
-
-import (
-	"fmt"
-
-	"github.com/luisjakon/cqlx"
-)
-
-type kv struct {
-	Key   int
-	Value string
-}
-
-var res kv
-
-func main() {
-
-	// Create session
-	sess, _ := cqlx.Open("example", "192.168.1.161").Session()
-	defer sess.Close()
-
-	// Create crud struct
-	kvdb := cqlx.Crud{
-		`SELECT * FROM kv WHERE key=:key`,
-		`INSERT INTO kv (key, value) VALUES (:key, :value)`,
-		`UPDATE kv SET value=:value WHERE key=:key IF EXISTS`,
-		`DELETE FROM kv WHERE key=:key`,
-	}
-
-	// Use available crud methods
-	kvdb.Insert(sess, &kv{2, "val2"})
-	kvdb.Update(sess, &kv{2, "val3"})
-	kvdb.Select(sess, &kv{Key: 2}).Get(&res)
-	kvdb.Delete(sess, &kv{Key: 2})
-
-	// Use explicit raw queries 
-	kvdb.Query(sess, `SELECT value FROM kv WHERE key=:key`, &kv{Key: 2}).Get(&res)
-
-	// Or gocqlx.qb queries instead
-	kvdb.Query(sess, qb.Select("kv").Where(qb.Eq("key")), &kv{Key: 2}).Get(&res)
-
-	...
 }
 ```
 
