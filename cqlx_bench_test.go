@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gocql/gocql"
+	"github.com/luisjakon/cqlx"
 	"github.com/scylladb/gocqlx"
 	"github.com/scylladb/gocqlx/qb"
 )
@@ -61,11 +62,11 @@ func load_fixtures() []*bkv {
 
 func load_data(b *testing.B, session *gocql.Session, data []*bkv) {
 
-	stmt, names := qb.Insert("cqlx_benchtest_db.bkv").Columns("key", "value").ToCql()
-	q := gocqlx.Query(session.Query(stmt), names)
+	sess := cqlx.Session(session)
+	stmt := qb.Insert("cqlx_benchtest_db.bkv").Columns("key", "value")
 
 	for _, p := range data {
-		if err := q.BindStruct(p).Exec(); err != nil {
+		if err := sess.Queryx(stmt).Put(p); err != nil {
 			b.Fatal(err)
 		}
 	}
